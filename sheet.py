@@ -16,15 +16,28 @@ artefacts.
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
+import providers
+
 HERE = Path(__file__).resolve().parent
-MANIFEST = HERE / "MANIFEST.json"
+# Sheets land in review/<provider-id>/ so two models' sets cannot overwrite each other's
+# scaffolding. Set once by main(); every builder below reads it rather than taking another
+# parameter, because the two game repositories' builders have different signatures and threading a
+# provider through both would be a bigger change than the feature is worth.
+PROVIDER = providers.reference()
 REVIEW = HERE / "review"
+
+
+def review_dir() -> Path:
+    out = REVIEW / PROVIDER.id
+    out.mkdir(parents=True, exist_ok=True)
+    return out
 
 # Tile width per set, and how many across. Wide sets get fewer columns so lettering and
 # silhouette detail stay legible at review size.
@@ -70,7 +83,7 @@ def build_set(name: str, assets: list[dict]) -> Path | None:
     tile_width, columns = LAYOUT.get(name, (260, 5))
     heights: list[int] = []
     for a in chosen:
-        with Image.open(HERE / a["path"]) as image:
+        with Image.open(PROVIDER.root / a["path"]) as image:
             heights.append(round(tile_width * image.size[1] / image.size[0]))
     tile_height = max(heights)
 
@@ -90,19 +103,26 @@ def build_set(name: str, assets: list[dict]) -> Path | None:
         column, row = index % columns, index // columns
         x = PAD + column * (tile_width + PAD)
         y = PAD + row * (tile_height + LABEL + PAD)
-        with Image.open(HERE / asset["path"]) as image:
+        with Image.open(PROVIDER.root / asset["path"]) as image:
             height = round(tile_width * image.size[1] / image.size[0])
             sheet.paste(image.convert("RGB").resize((tile_width, height), Image.LANCZOS), (x, y))
         draw.text((x, y + height + 4), f'{asset["slug"]}  {asset["accent"]}', fill=INK, font=typeface)
 
-    REVIEW.mkdir(exist_ok=True)
-    out = REVIEW / f"sheet-{name}.png"
+    out = review_dir() / f"sheet-{name}.png"
     sheet.save(out, format="PNG")
     return out
 
 
 def main(argv: list[str]) -> int:
-    assets = json.loads(MANIFEST.read_text())["assets"]
+    global PROVIDER
+    parser = argparse.ArgumentParser(description="Contact sheets, one set at a time.")
+    providers.add_argument(parser)
+    parser.add_argument("names", nargs="*")
+    args = parser.parse_args(argv)
+    chosen = providers.selected(args)
+    PROVIDER = chosen[0] if chosen else providers.reference()
+    argv = args.names
+    assets = json.loads(PROVIDER.manifest.read_text())["assets"]
     wanted = argv or list(LAYOUT)
     for name in wanted:
         built = build_set(name, assets)

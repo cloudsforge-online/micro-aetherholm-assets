@@ -28,6 +28,7 @@ watermark survives; the signed box does not. Every source file is kept beside it
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import sys
@@ -36,9 +37,15 @@ from pathlib import Path
 
 from PIL import Image, ImageChops
 
+import providers
+
 HERE = Path(__file__).resolve().parent
-ASSETS = HERE / "assets"
-MANIFEST = HERE / "MANIFEST.json"
+
+# The provider root every emitted path is relative to. Set once by main(); a module-level name
+# rather than another parameter threaded through builders whose signatures differ between the
+# estate's asset repositories. Keeping `assets/...` identical in every manifest is what lets
+# compare.py line the same asset up across models without parsing a directory name.
+ROOT = HERE
 
 GROUND = (0x12, 0x10, 0x0F)
 C2PA_MARKER = b"c2pa"
@@ -48,16 +55,16 @@ OG_SOURCE = (1200, 640)
 SOCIAL = (1280, 640)
 
 
-def load_parents() -> dict[str, dict]:
+def load_parents(manifest: Path) -> dict[str, dict]:
     """Index the manifest by asset key, so a derivative inherits its source's record.
 
     The prompt, the model, the accent and the licence belong to the generation, not to the cut;
     only the facts the derivation CHANGES — size, checksum, byte count, C2PA state — are
     recomputed.
     """
-    if not MANIFEST.exists():
+    if not manifest.exists():
         return {}
-    document = json.loads(MANIFEST.read_text())
+    document = json.loads(manifest.read_text())
     return {a["asset"]: a for a in document.get("assets", [])}
 
 
@@ -72,11 +79,12 @@ def entry(parent: dict, *, asset: str, path: Path, declared: tuple[int, int], so
     with Image.open(path) as image:
         delivered = image.size
     return {
+        "provider": parent.get("provider", providers.reference().id),
         "asset": asset,
         "set": parent["set"],
         "slug": parent["slug"],
         "name": parent["name"],
-        "path": str(path.relative_to(HERE)),
+        "path": str(path.relative_to(ROOT)),
         "accent": parent["accent"],
         "secondaryAccent": parent["secondaryAccent"],
         "groundClass": ground_class or parent["groundClass"],
@@ -85,7 +93,7 @@ def entry(parent: dict, *, asset: str, path: Path, declared: tuple[int, int], so
         "deliveredSize": f"{delivered[0]}x{delivered[1]}",
         "sizing": "exact" if tuple(delivered) == declared else "unsized",
         "cropped": cropped,
-        "derivedFrom": str(source.relative_to(HERE)),
+        "derivedFrom": str(source.relative_to(ROOT)),
         "backend": parent["backend"],
         "model": parent["model"],
         "prompt": parent["prompt"],
@@ -172,8 +180,19 @@ def composite_card(backdrop: Path, wordmark: Path, out: Path, *, size: tuple[int
         card.save(out, format="PNG", optimize=True)
 
 
-def main() -> int:
-    parents = load_parents()
+def main(argv: list[str]) -> int:
+    parser = argparse.ArgumentParser(description="Rebuild this set's derivatives.")
+    parser.add_argument("--provider", default=None, help="provider id from providers.json")
+    args = parser.parse_args(argv[1:])
+    provider = providers.by_id(args.provider) if args.provider else providers.reference()
+    global ROOT
+    ROOT, ASSETS = provider.root, provider.assets
+    if not ASSETS.is_dir():
+        # A candidate with nothing generated yet is not an error. It is the normal state of a
+        # candidate set until its endpoint serves.
+        json.dump([], sys.stdout)
+        return 0
+    parents = load_parents(provider.manifest)
     out: list[dict] = []
 
     # ---- favicons: 512, 192 and 32, Lanczos-cut from the 1024 mark.
@@ -289,4 +308,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(main(sys.argv))
