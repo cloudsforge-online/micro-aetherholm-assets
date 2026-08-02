@@ -1,0 +1,37 @@
+{
+  "name": "@cloudsforge/aetherholm-assets",
+  "version": "1.0.0",
+  "private": true,
+  "description": "The Aetherholm art set, and the run that produced it. Images plus a provenance manifest; the generation engine lives in the sibling studio service and the art specification lives in the game the estate ships (aetherholm/src/content.ts), and neither is duplicated here.",
+  "license": "MIT",
+  "type": "module",
+  "_noDependencies": [
+    "This package has no dependencies and no node_modules of its own, on purpose.",
+    "",
+    "generate.ts imports four modules from ../studio/src — backend, specs, sizing and the licence",
+    "constant from assets — and plan.ts imports the shipped game content from",
+    "../aetherholm/src/content.ts and world.ts. All of them are dependency-free, so nothing has",
+    "to be installed to read them; what the studio modules encode is every verified fact about",
+    "the FLUX 2 Pro endpoint, and what the game content encodes is the identity of every",
+    "building, ship, resource and band. A second copy of either here would be a second place for",
+    "it to rot — doc 20 §4 planned the content JSON to live in THIS repository, and the",
+    "inversion of that plan (the service is the canon) is recorded in the README.",
+    "",
+    "The consequence is that this repository is NOT self-contained: a RUN needs the sibling",
+    "checkouts beside it. The ARTEFACTS are self-contained — the PNGs, MANIFEST.json and",
+    "PLAN.json carry everything needed to audit what was made and from what.",
+    "",
+    "normalise_ground.py is pure standard library. derive.py, sheet.py and verify.py need",
+    "Pillow. Not sips: design-system.md section 7 item 3 names sips as the reason the estate's",
+    "resize step once existed on exactly one laptop."
+  ],
+  "scripts": {
+    "_run": "Run from the studio workspace so tsx resolves out of its node_modules.",
+    "plan": "cd ../studio && node --import tsx ../aetherholm-assets/generate.ts --plan",
+    "generate": "cd ../studio && node --import tsx ../aetherholm-assets/generate.ts",
+    "derive": "cd ../studio && node --import tsx ../aetherholm-assets/generate.ts --derive-only",
+    "normalise": "python3 normalise_ground.py",
+    "verify": "python3 verify.py",
+    "sheets": "python3 sheet.py"
+  }
+}
