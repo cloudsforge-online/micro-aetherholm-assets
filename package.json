@@ -32,6 +32,7 @@
     "derive": "cd ../studio && node --import tsx ../aetherholm-assets/generate.ts --derive-only",
     "normalise": "python3 normalise_ground.py",
     "verify": "python3 verify.py",
+    "verify:self-test": "python3 verify.py --self-test",
     "sheets": "python3 sheet.py",
     "probe": "cd ../studio && node --import tsx ../aetherholm-assets/probe.ts",
     "test": "cd ../studio && node --import tsx --test ../aetherholm-assets/parity.test.ts",

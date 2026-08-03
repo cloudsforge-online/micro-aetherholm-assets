@@ -86,7 +86,10 @@ def main(argv: list[str]) -> int:
             steps.append(step)
         entry["postProcessing"] = steps
         print(f'{entry["path"]}  {changed} ink px toward {entry["accent"]}')
-    MANIFEST.write_text(json.dumps(document, indent=2) + "\n")
+    # `ensure_ascii=False`, to match generate.ts's JSON.stringify — see normalise_ground.py.
+    # Without it this tool re-escapes every non-ASCII character generate.ts wrote raw, and
+    # MANIFEST.json oscillates between two byte-different encodings of identical data.
+    MANIFEST.write_text(json.dumps(document, indent=2, ensure_ascii=False) + "\n")
     return 0
 
 
