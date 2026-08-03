@@ -14,6 +14,8 @@ the licence string carried by each asset.
 > and the FLUX key lives in `../studio/.env.local`, read at run time and never written, logged
 > or echoed.
 
+Design authority: [`ecosystem/20-aetherholm.md`](https://github.com/cloudsforge-online/micro-docs/blob/main/ecosystem/20-aetherholm.md)
+
 ---
 
 ## 1. What is here
@@ -269,3 +271,13 @@ Two numerical steps this run added beyond the Emberkin pipeline, both measured i
 - No registry row names an `aetherholm` surface accent; the title deliberately wears Worlds'
   moss (`docs/ecosystem/20-aetherholm.md` §6, the registry-row bullet), so nothing is missing —
   recorded so nobody "fixes" it into a new accent.
+
+---
+
+## Provenance
+
+The code in this repository was written by **Claude Opus 5** and **Claude Fable 5**, under
+human direction and review.
+
+The shipped art was generated with **FLUX 2 Pro** (`flux-2-pro`). Comparison sets generated
+with **Qwen-Image 2512** (`qwen-image-2512`) live under `candidates/` and are never shipped.
