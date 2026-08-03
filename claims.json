@@ -23,6 +23,31 @@
   ],
   "claims": [
     {
+      "document": "README.md",
+      "find": "\\n(\\d+) files: \\d+ generated",
+      "derive": "repo.assets"
+    },
+    {
+      "document": "README.md",
+      "find": "files: (\\d+) generated and \\d+ derived",
+      "derive": "repo.generated"
+    },
+    {
+      "document": "README.md",
+      "find": "generated and (\\d+) derived\\. The set is",
+      "derive": "repo.derived"
+    },
+    {
+      "document": "README.md",
+      "find": "seven checks over all (\\d+) files",
+      "derive": "repo.assets"
+    },
+    {
+      "document": "README.md",
+      "find": "measured: (\\d+)/\\d+ read",
+      "derive": "repo.c2pa"
+    },
+    {
       "document": "COMPARISON.md",
       "find": "\\n(\\d+) manifest entries",
       "derive": "repo.assets"
