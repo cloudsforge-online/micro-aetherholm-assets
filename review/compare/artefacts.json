@@ -1,5 +1,5 @@
 {
-  "$scope": "The 4 `icons/resource-*` assets visible in review/compare/compare-icons.png (aether, cloudstone, provisions, skysteel), scored beside their counterparts. A SAMPLE, not the whole icons set \u2014 stated so the counts are not read as out of 25.",
+  "$scope": "The 4 `icons/resource-*` assets visible in review/compare/compare-icons.png (aether, cloudstone, provisions, skysteel), scored beside their counterparts. A SAMPLE, not the whole icons set — stated so the counts are not read as out of 25. NOTE the third column is a DIFFERENT PROMPT DIALECT — see COMPARISON.md's positive-dialect section — scored on the same four assets and the same taxonomy, which is what makes it readable, but it is not a controlled comparison with the first two and must not be read as one.",
   "flux-2-pro": {
     "frame / border / bounding box": 0,
     "non-flat rendering (3D, bevel, gradient, glow, texture)": 0,
@@ -13,6 +13,13 @@
     "idea not recognisable from the plan": 0
   },
   "$notes": {
-    "the shape of the error": "Qwen read every one as a mobile-game ITEM CARD \u2014 decorative frame, bevelled centre panel, lighter background \u2014 rather than as a flat icon on the ash ground. The subject is right every time (aether droplet, cloudstone, wheat sheaf, skysteel ingot); it is the artefact type that is wrong, which is why criterion 1's arithmetic largely passes it and the eye does not."
+    "the shape of the error": "Qwen read every one as a mobile-game ITEM CARD — decorative frame, bevelled centre panel, lighter background — rather than as a flat icon on the ash ground. The subject is right every time (aether droplet, cloudstone, wheat sheaf, skysteel ingot); it is the artefact type that is wrong, which is why criterion 1's arithmetic largely passes it and the eye does not.",
+    "qwen-image-2512-positive": "4 of 4 framed and 4 of 4 bevelled, against a brief carrying no prohibition words at all. The item-card reading survived the rewrite intact: decorative border, bevelled centre panel, lighter inner field. It got WORSE in two places the literal set had right — resource-aether returned a large blue arc instead of a teardrop above a ring, and resource-skysteel returned a plain cube instead of a notched ingot, so 'idea not recognisable' goes from 0 of 4 to 2 of 4. The one clause that moved is the one about the field behind the subject: aether and skysteel came back on a mottled brown texture, which is worse than the literal set's flat dark panels."
+  },
+  "qwen-image-2512-positive": {
+    "frame / border / bounding box": 4,
+    "non-flat rendering (3D, bevel, gradient, glow, texture)": 4,
+    "ground not the flat ash field": 3,
+    "idea not recognisable from the plan": 2
   }
 }
