@@ -1,0 +1,18 @@
+{
+  "$scope": "The 4 `icons/resource-*` assets visible in review/compare/compare-icons.png (aether, cloudstone, provisions, skysteel), scored beside their counterparts. A SAMPLE, not the whole icons set \u2014 stated so the counts are not read as out of 25.",
+  "flux-2-pro": {
+    "frame / border / bounding box": 0,
+    "non-flat rendering (3D, bevel, gradient, glow, texture)": 0,
+    "ground not the flat ash field": 0,
+    "idea not recognisable from the plan": 0
+  },
+  "qwen-image-2512": {
+    "frame / border / bounding box": 4,
+    "non-flat rendering (3D, bevel, gradient, glow, texture)": 4,
+    "ground not the flat ash field": 4,
+    "idea not recognisable from the plan": 0
+  },
+  "$notes": {
+    "the shape of the error": "Qwen read every one as a mobile-game ITEM CARD \u2014 decorative frame, bevelled centre panel, lighter background \u2014 rather than as a flat icon on the ash ground. The subject is right every time (aether droplet, cloudstone, wheat sheaf, skysteel ingot); it is the artefact type that is wrong, which is why criterion 1's arithmetic largely passes it and the eye does not."
+  }
+}
