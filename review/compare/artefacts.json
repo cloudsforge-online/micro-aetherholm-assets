@@ -21,5 +21,42 @@
     "non-flat rendering (3D, bevel, gradient, glow, texture)": 4,
     "ground not the flat ash field": 3,
     "idea not recognisable from the plan": 2
+  },
+  "$pilot": {
+    "$scope": "This repository's contribution to the estate-wide 15-asset positive-dialect pilot, micro-brand/COMPARISON.md section 9.3. These are the same 4 `icons/resource-*` assets the columns above score, restated under the row names that section's table uses, so the three repositories' contributions can be summed without a name-matching step. The other 11 are micro-brand's 2 currency marks and emberkin's 9 `types` icons. claims.py sums the three $pilot blocks, checks each one against the columns it was taken from via $columnAlias, and checks the section 9.3 table against the sum.",
+    "$assets": [
+      "icons/resource-aether",
+      "icons/resource-cloudstone",
+      "icons/resource-provisions",
+      "icons/resource-skysteel"
+    ],
+    "$columnAlias": {
+      "framed / bordered / boxed": "frame / border / bounding box",
+      "non-flat (3D, bevel, gradient, glow)": "non-flat rendering (3D, bevel, gradient, glow, texture)",
+      "ground not the flat ash field": "ground not the flat ash field",
+      "idea not recognisable from the plan": "idea not recognisable from the plan"
+    },
+    "$unscored": {
+      "construction guides drawn": "Not scored over the icons sheet by this reviewer, so there is no figure to sum and claims.py does not pin that row of the section 9.3 table.",
+      "recognisable pastiche of an existing artwork": "Not scored here either. The absence is recorded rather than filled with a zero: an unscored row and a row scored zero are different statements, and only one of them is evidence."
+    },
+    "flux-2-pro": {
+      "framed / bordered / boxed": 0,
+      "non-flat (3D, bevel, gradient, glow)": 0,
+      "ground not the flat ash field": 0,
+      "idea not recognisable from the plan": 0
+    },
+    "qwen-image-2512": {
+      "framed / bordered / boxed": 4,
+      "non-flat (3D, bevel, gradient, glow)": 4,
+      "ground not the flat ash field": 4,
+      "idea not recognisable from the plan": 0
+    },
+    "qwen-image-2512-positive": {
+      "framed / bordered / boxed": 4,
+      "non-flat (3D, bevel, gradient, glow)": 4,
+      "ground not the flat ash field": 3,
+      "idea not recognisable from the plan": 2
+    }
   }
 }
