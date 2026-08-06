@@ -33,9 +33,9 @@ assets/<set>/<slug>-<width>x<height>.png
 
 | Set | Count | What |
 | --- | --- | --- |
-| `islands/` | 12 | Island archetypes: 3 altitude bands (`world.ts:30`) × 4 biomes (ART_BIBLE.md §3), 1024², flat sprites. |
-| `buildings/` | 20 | One sprite per building type in `content.ts:23-44`, 512², three-quarter view. |
-| `ships/` | 10 | One side profile per airship class in `content.ts:240-251`, 1024×512; role read off the spec table. |
+| `islands/` | 12 | Island archetypes: 3 altitude bands (`world.ts`) × 4 biomes (ART_BIBLE.md §3), 1024², flat sprites. |
+| `buildings/` | 20 | One sprite per building type in `content.ts`, 512², three-quarter view. |
+| `ships/` | 10 | One side profile per airship class in `content.ts`, 1024×512; role read off the spec table. |
 | `shipicons/` | 10 | Flat vector class icons, 256², Worlds moss. |
 | `icons/` | 16 | Resources, population, strain, aegis, spire, lanes, queues, fleet, battle, chronicle, 512². |
 | `heraldry/` | 16 | 4 fields, 8 charges, 4 rank crests, 512² — the components behind `worlds`' ranked banner URNs (§5). |
@@ -57,8 +57,7 @@ of that change".
 `docs/ecosystem/20-aetherholm.md` §4 planned the full content trees as "seeded content JSON in
 `micro-aetherholm-assets`. — content drives both the engine and the art prompts". **That plan
 inverted.** Phases 1–2 built the content in the service instead — the 20 building types at
-`aetherholm/src/content.ts:23-44`, the research trees at `:55-96`, the 10 airship classes at
-`:240-251` with their balance table at `:302-313` — and the service is now the canon. This
+`aetherholm/src/content.ts`, the research trees, the 10 airship classes with their balance table — and the service is now the canon. This
 repository carries **no content JSON at all**: `plan.ts` imports the service's own modules and
 derives the work list from them, asserting the doc's counts (20 buildings, 10 airships, 4
 resources, 3 bands) before anything is spent.
@@ -72,7 +71,7 @@ colour the game never renders (the Emberkin run's measured lesson). The engine e
 Two consequences worth naming:
 
 - `content.ts`'s own header still says the full trees "live in `micro-aetherholm-assets` when
-  that repository exists" (`content.ts:5-8`) — stale as of this repository, reported to the
+  that repository exists" (`content.ts`) — stale as of this repository, reported to the
   service's owner rather than edited from here.
 - The four **biomes** exist in no document and no source: doc §8 counts "3 bands × 4 biomes"
   and never names the four. They are authored in ART_BIBLE.md §3 (terrace, crag, grove, reef)
@@ -138,9 +137,9 @@ PNG's C2PA chunk while keeping the invisible pixel watermark — so a derivative
 ## 5. Heraldry: how the ranks are distinguished
 
 `worlds` mints sealed-season heraldry as one URN per rank —
-`cf:aetherholm:heraldry:<seasonId>:rank:<n>` (`worlds/src/heraldry.ts:81`) — and its header
+`cf:aetherholm:heraldry:<seasonId>:rank:<n>` (`worlds/src/heraldry.ts`) — and its header
 states "first place and fifth place are different artwork, decided by the asset pipeline later"
-(`worlds/src/heraldry.ts:24-26`). This set is that decision. A banner composes **field + charge
+(`worlds/src/heraldry.ts`). This set is that decision. A banner composes **field + charge
 + crest**, and the rank lives in the crest tier, distinguished on three channels at once so the
 tiers survive monochrome:
 
@@ -273,7 +272,7 @@ Two numerical steps this run added beyond the Emberkin pipeline, both measured i
   recorded here rather than re-rolled: the compositions are exceptional, the scrawls are
   illegible at any shipping size, and a re-roll discards the whole painting to remove them.
   If either is ever re-generated for other reasons, the prohibition stands in the prompt.
-- `content.ts:5-8` still promises the trees to this repository (§2). The correction belongs to
+- `content.ts` still promises the trees to this repository (§2). The correction belongs to
   `micro-aetherholm`, not here.
 - No registry row names an `aetherholm` surface accent; the title deliberately wears Worlds'
   moss (`docs/ecosystem/20-aetherholm.md` §6, the registry-row bullet), so nothing is missing —

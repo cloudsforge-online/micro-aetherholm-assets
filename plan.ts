@@ -7,8 +7,8 @@
  * sources is the drift defect this estate keeps paying for (seven clients built against imagined
  * surfaces; a palette one hex stale would ship fifty portraits in a colour the game never
  * renders). So this module IMPORTS the service's content — the 20 building types
- * (`content.ts:23-44`), the 10 airship classes and their specs (`content.ts:240-251`, `:302-313`),
- * the 4 resources (`content.ts:17`) and the 3 altitude bands (`world.ts:30`) — and a plan that is
+ * (`content.ts`), the 10 airship classes and their specs (`content.ts`),
+ * the 4 resources (`content.ts`) and the 3 altitude bands (`world.ts`) — and a plan that is
  * read cannot drift from the thing it was read from. The service is not modified.
  *
  * What is AUTHORED here is the art direction: what each building looks like, how a role reads on
@@ -278,7 +278,7 @@ function islandAssets(): PlannedAsset[] {
 
 /**
  * One line of art direction per building type. The LIST is the game's
- * (`content.ts:23-44`, pinned to 20 by `content.test.ts`); the look is ART_BIBLE.md §4.
+ * (`content.ts`, pinned to 20 by `content.test.ts`); the look is ART_BIBLE.md §4.
  */
 const BUILDING_LOOK: Readonly<Record<BuildingType, string>> = {
   skyhall:
@@ -382,8 +382,8 @@ function buildingAssets(): PlannedAsset[] {
 
 /**
  * Look per class, derived from the spec that BALANCES the class — role, hull weight and cargo
- * come from `content.ts:302-313`, and the freight/war split (only haulers carry cargo,
- * `content.ts:316-318`) is stated on the hull: freighters get holds and cranes, warships get
+ * come from `content.ts`, and the freight/war split (only haulers carry cargo,
+ * `content.ts`) is stated on the hull: freighters get holds and cranes, warships get
  * guns, and neither gets the other's fittings.
  */
 const SHIP_LOOK: Readonly<Record<AirshipClass, string>> = {
@@ -496,9 +496,9 @@ function shipIconAssets(): PlannedAsset[] {
 /* ------------------------------------------------------------------ set 5: resource / UI / status icons */
 
 /**
- * Sixteen icons. The four resource icons take their identity from `content.ts:17`; the rest are
+ * Sixteen icons. The four resource icons take their identity from `content.ts`; the rest are
  * the game's states and fixtures (strain and the communal well, doc §2; aegis, doc §4; spires,
- * doc §2; wind lanes, doc §2; the three queues, `content.ts:320-341`). Each is a topologically
+ * doc §2; wind lanes, doc §2; the three queues, `content.ts`). Each is a topologically
  * different shape, so no pair relies on colour alone.
  */
 interface IconSpec {
@@ -555,9 +555,9 @@ function iconAssets(): PlannedAsset[] {
 
 /**
  * Sixteen components in three kinds of part. These become the sealed-season banners `worlds`
- * mints as `cf:aetherholm:heraldry:<seasonId>:rank:<n>` (`worlds/src/heraldry.ts:81`), whose
+ * mints as `cf:aetherholm:heraldry:<seasonId>:rank:<n>` (`worlds/src/heraldry.ts`), whose
  * header states "first place and fifth place are different artwork, decided by the asset
- * pipeline later" (`worlds/src/heraldry.ts:24-26`). The rank distinction is carried by the four
+ * pipeline later" (`worlds/src/heraldry.ts`). The rank distinction is carried by the four
  * CRESTS: metal, silhouette complexity and coverage step down together — gold laurel crown,
  * blued-silver open wreath, bronze single plume, plain iron pennon bar — so the tiers read even
  * in monochrome. A rank-n banner composes field + charge + the crest of its tier.

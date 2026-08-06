@@ -7,9 +7,9 @@ painterly key art, readable flat sprites for play* — and this file is those el
 specific enough to draw a hundred images that read as one game.
 
 What is **content** here comes from the game the estate actually ships: the 20 building types
-(`aetherholm/src/content.ts:23-44`), the 10 airship classes and their roles
-(`aetherholm/src/content.ts:240-251`, spec table `:302-313`), the 4 resources
-(`content.ts:17`) and the 3 altitude bands (`aetherholm/src/world.ts:30`). What is **art
+(`aetherholm/src/content.ts`), the 10 airship classes and their roles
+(`aetherholm/src/content.ts`, spec table), the 4 resources
+(`content.ts`) and the 3 altitude bands (`aetherholm/src/world.ts`). What is **art
 direction** is authored in this file and nowhere else — including the four biomes, which no
 document or source file names (doc §8 says "3 bands × 4 biomes" and stops), so they are named
 here and this file is their source of truth.
@@ -63,7 +63,7 @@ accent clause.
 
 ## 3. The three bands and the four biomes
 
-Bands are content (`world.ts:30`); their light is direction:
+Bands are content (`world.ts`); their light is direction:
 
 - **Shallows** — low in the cloud-sea: thick cream-gold cloud banks lapping the island's skirts,
   hazy warm light, the safest and softest band.
@@ -96,7 +96,7 @@ underside tapering to a rootless keel of rock, on the flat ground.
   below, aether burners aft. Role is read at a glance: **scouts** are small and open, **war**
   hulls carry guns and armour plating scaled with their class, the **siege** Breaker carries one
   oversized ram-mortar, **freight** hulls are broad-bellied with cargo cranes and almost no
-  guns — the freight/war split is the game's own rule (`content.ts:259-260`, only haulers carry
+  guns — the freight/war split is the game's own rule (`content.ts`, only haulers carry
   cargo) and the art must state it.
 - **Airship icons** (256²): flat geometric vector silhouette of the same profile, moss
   `#6d9a49`, legible at 20 pixels, topologically distinct per class.
@@ -118,7 +118,7 @@ Sixteen components in three ranks of parts, drawn as flat heraldic vector on the
 - **8 charges** — the central emblem, all in heraldic gold `#d4af4a`: spire, airship, well,
   storm anchor, thunderbolt, gale chevrons, aether star, watchtower.
 - **4 rank crests** — the piece that says *where you placed*, because
-  `worlds/src/heraldry.ts:24-26` mints one URN per rank
+  `worlds/src/heraldry.ts` mints one URN per rank
   (`cf:aetherholm:heraldry:<seasonId>:rank:<n>`) and states "first place and fifth place are
   different artwork, decided by the asset pipeline". The distinction is a metal-and-form tier,
   the way physical honours do it:
