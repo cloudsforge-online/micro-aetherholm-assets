@@ -37,10 +37,10 @@ assets/<set>/<slug>-<width>x<height>.png
 | `buildings/` | 20 | One sprite per building type in `content.ts`, 512², three-quarter view. |
 | `ships/` | 10 | One side profile per airship class in `content.ts`, 1024×512; role read off the spec table. |
 | `shipicons/` | 10 | Flat vector class icons, 256², Worlds moss. |
-| `icons/` | 16 | Resources, population, strain, aegis, spire, lanes, queues, fleet, battle, chronicle, 512². |
+| `icons/` | 16 | Resources, aegis, spire, lanes, queues, fleet, battle, chronicle, 512² — **plus population and strain, which the built game has neither of** (§11). |
 | `heraldry/` | 16 | 4 fields, 8 charges, 4 rank crests, 512² — the components behind `worlds`' ranked banner URNs (§5). |
 | `keyart/` | 4 | Hero 1920×768, og backdrop 1200×640, social backdrop 1280×640, wordmark backdrop 1536×512 — scenes, textless. |
-| `splashes/` | 6 | Season/event splashes, 1536×640. |
+| `splashes/` | 6 | Season/event splashes, 1536×640. One of the six paints a mechanic the built game does not have and one paints a Private Skerry, which it does have and no client can yet reach (§11). |
 | `title/` | 2 + 5 | Generated mark 1024² and wordmark 1024×384; derived favicon 512/192/32, composited og 1200×630 and social 1280×640. |
 
 101 files: 96 generated and 5 derived. The set is
@@ -169,6 +169,13 @@ does not: **every PNG on disk must have a manifest entry**, because `micro-ember
 currently has two favicons on disk with none — found while building this repository, reported,
 not fixed here.
 
+`gaps.py` checks the one claim in this README that is not about bytes at all: **a picture of a
+mechanic is an assertion about another repository.** It searches a sibling `micro-aetherholm`
+checkout for the word each such picture turns on and requires §11 to agree with what it finds, in
+both directions, refusing to pass when the checkout is absent (exit 2, never 0). It excludes the
+service's own tests — a suite is not the game — and asserts it read something before grading it,
+because a check that lost its operand is this estate's most-repeated defect.
+
 ## 7. What the run cost
 
 96 images shipped from **105 billed generations** — 9 discarded re-rolls (two inverted
@@ -265,6 +272,28 @@ Two numerical steps this run added beyond the Emberkin pipeline, both measured i
 
 ## 11. Known gaps
 
+**Three pictures illustrate a game that was designed and not built** — `icons/status-population`,
+`icons/status-strain` and `splashes/storm-surge`. The set was planned from
+`docs/ecosystem/20-aetherholm.md` §8 and the phases `micro-aetherholm` shipped are a subset of
+that plan, so a citizen count and a well-overdraw model were painted and never coded:
+`grep -rnw population src/` and `grep -rnw strain src/` over the service return **nothing**, and
+have since the run. Recorded rather than fixed, in either direction:
+
+- **Nothing is deleted.** They are permanent FLUX 2 Pro output, they are good pictures, and the
+  set is the record of what was made — not a description of what shipped.
+- **No mechanic is commissioned to justify a picture.** A population model is design work, and
+  "the art asked for it" is the worst possible argument for it. `micro-aetherholm-web` holds all
+  three out of its bundle with a reason each, which is the right place for that decision: a
+  resource icon hung off an unrelated number is a confident lie nobody reports.
+
+`gaps.py` re-measures this paragraph against a sibling `micro-aetherholm` checkout on every CI
+run, in **both** directions — it fails if a picture here illustrates something the service has
+since built, because a gap that closed while the note stayed sends the next reader to build a
+thing that already exists.
+
+One splash looks like a fourth and is not; §12 says which, and why it is filed separately rather
+than here.
+
 - The wordmark backdrop ships textless by design; the client typesets over it. If the client
   ever wants a pre-lettered wide banner, it is a `derive.py` composite, not a generation.
 - `keyart/hero` and `keyart/wordmark-backdrop` each carry a faint invented painter's-signature
@@ -277,6 +306,23 @@ Two numerical steps this run added beyond the Emberkin pipeline, both measured i
 - No registry row names an `aetherholm` surface accent; the title deliberately wears Worlds'
   moss (`docs/ecosystem/20-aetherholm.md` §6, the registry-row bullet), so nothing is missing —
   recorded so nobody "fixes" it into a new accent.
+
+## 12. Not a gap: the Private Skerry
+
+`splashes/private-skerry` was mistaken for one of §11's until 2026-08-10, and it is a different
+thing entirely. The Private Skerry is **built and sold**: `provisioning.ts` raises one against a
+paid entitlement, `world.ts` seeds its twelve islands from `skerrySeed(entitlementId)` so one
+purchase yields one geography, the title contract's provision route serves it, and
+`aetherholm.skerry.provisioned` goes out on the bus. The picture is TRUE.
+
+What is missing is the way in. Provisioning is a service act the entitlement bridge drives — a
+user token is refused — and no route lists the archipelagos a subject owns, so a client is never
+handed an id and has nothing to draw the splash beside. That is a route in `micro-aetherholm`,
+and a far smaller thing than the three above.
+
+It is recorded here rather than in §11 because the difference is the whole point of that section,
+and because `gaps.py` enforces it: a slug in §11 whose mechanic the service HAS is a failure.
+A closed gap left standing as a note sends the next reader to build something that exists.
 
 ---
 
