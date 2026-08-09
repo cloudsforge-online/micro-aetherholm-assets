@@ -59,3 +59,52 @@ jobs:
               print(f'{path}: on disk with no manifest entry', file=sys.stderr)
           sys.exit(1 if orphans else 0)
           EOF
+
+  # ── A picture of a mechanic is a claim about another repository ─────────────────────────────
+  #
+  # verify.py checks bytes against the manifest. It cannot check the one thing this README says
+  # that is not about bytes: that `icons/status-population` is an icon for a citizen count. Three
+  # of the 101 illustrate a game that was designed (doc 20 §8) and not built, and until 2026-08-10
+  # the README described all of them as though the game had them — while a fourth, the Private
+  # Skerry, was being treated estate-wide as a gap although micro-aetherholm provisions and sells
+  # one. Both errors are invisible to a verifier that only weighs pixels, and both rot the same
+  # way: nothing re-reads prose.
+  #
+  # This job is separate from the manifest job because it needs a second checkout and a token,
+  # and a set with no sibling beside it must not silently pass — gaps.py exits 2, never 0.
+  gaps:
+    name: gaps.py
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      # Checked out into a NAMED directory rather than the workspace root, because gaps.py looks
+      # for the service beside this repository the way a developer's estate has it. `path:` must
+      # stay inside the workspace, so both checkouts are siblings within it.
+      - uses: actions/checkout@v4
+        with: { path: aetherholm-assets }
+      # src only: gaps.py reads the service's TypeScript and runs nothing.
+      - uses: actions/checkout@v4
+        with:
+          repository: cloudsforge-online/micro-aetherholm
+          path: aetherholm
+          token: ${{ secrets.ESTATE_READ_TOKEN }}
+          sparse-checkout: |
+            src
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      # No Pillow: this reads text. Standard library only, like normalise_ground.py.
+      - name: the README describes the game that was built
+        working-directory: aetherholm-assets
+        run: |
+          set -euo pipefail
+          out=$(python3 gaps.py 2>&1) && status=0 || status=$?
+          printf '%s\n' "$out"
+          # Read from a here-string rather than piping into grep: `grep -q` exits at its first
+          # match, the producer takes EPIPE, and under pipefail a MATCH is scored as a failure.
+          if grep -q '^UNCHECKED' <<<"$out"; then
+            echo "::error::micro-aetherholm was not checked out; the mechanic claims were never measured"
+            exit 1
+          fi
+          [ "$status" -eq 0 ] || exit "$status"
