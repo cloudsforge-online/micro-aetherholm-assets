@@ -180,10 +180,87 @@ def composite_card(backdrop: Path, wordmark: Path, out: Path, *, size: tuple[int
         card.save(out, format="PNG", optimize=True)
 
 
+def resample_one(source: Path, target: Path, size: tuple[int, int]) -> dict:
+    """Lanczos one file down to one size and report what the result measures. Nothing else.
+
+    ## Why this mode exists, and why it is here rather than in generate.ts
+
+    Some endpoints refuse to generate at a size this set declares. gpt-image-2 has a minimum pixel
+    budget — measured, by bisection, to sit in (524288, 655360] — and SEVENTY-THREE of this set's
+    96 generations fall under it: fifty-two buildings, heraldry and icons at 512x512, ten ship pips
+    at 256x256, ten airship profiles at 1024x512 and the 1024x384 wordmark. Each is generated at
+    the smallest exact-aspect multiple on the 16-grid that clears the budget and cut DOWN to the
+    declared size. That is three quarters of the set rather than a corner of it, which is why this
+    mode is load-bearing here in a way it is not in the sibling repositories.
+
+    The pixels have to move in Pillow, for the same reason every other resample in this file does:
+    `studio/src/sizing.ts` measures and deliberately does not resample, because doing it in pure
+    TypeScript is a PNG decoder, a filter reconstructor, a resampler and an encoder, and doing it
+    with `sharp` is a native dependency in a repository that has none. And Pillow rather than macOS
+    `sips` — design-system.md §7 item 3 names `sips` as the reason the estate's post-processing
+    stage exists on exactly one laptop.
+
+    It is in THIS file rather than in a new shared module because `derive.py` is already the
+    per-repository Pillow tool and is already listed under `shared.perRepository` in providers.json.
+    A new `resample.py` would have to go in `shared.acrossAllThree`, which claims.py validates in
+    both directions and which requires every sibling's `shared` block to be byte-identical — a
+    three-repository change to avoid a thirty-line function.
+
+    **No ground snap and no edge matte here, unlike the favicons above**, and the difference is
+    deliberate. Those two repairs exist because a favicon is cut to 32 pixels, where Lanczos ringing
+    moves a corner off the exact ground and the verifier's corner patch is a quarter of the picture.
+    This mode's smallest output is 256 and its typical one is 512, where neither applies — and more
+    to the point, this file is the model's own delivery on its way to becoming the asset, not a
+    derivative of an asset that already passed. Repairing it here would repair the very thing the
+    comparison is trying to measure: whether THIS MODEL puts the ground where the brief says. The
+    ground repair belongs where it already is, in normalise_ground.py, which runs afterwards, over
+    every set alike, and RECORDS what it changed in `deliveredGround`.
+
+    **This mode never touches the manifest**, on purpose. The caller has the prompt, the model, the
+    attempts and the retry count; this has one source file, one target and one size, so it cannot
+    corrupt a record it does not read.
+    """
+    with Image.open(source) as image:
+        # RGBA before resizing: a palette image resampled in its own mode gives Lanczos nothing to
+        # interpolate between and comes back with the same stair-stepping the downscale was for.
+        resized = image.convert("RGBA").resize(size, Image.LANCZOS)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        resized.save(target, format="PNG", optimize=True)
+    sha, byte_size, c2pa = digest(target)
+    with Image.open(target) as written:
+        measured = written.size
+    return {
+        "sha256": sha,
+        "byteSize": byte_size,
+        # Measured on the bytes written, never inherited from the source. Re-encoding drops the
+        # C2PA chunk, so this is expected to be False even where the native carried one — and it is
+        # reported rather than assumed, because assuming it is the defect this estate shipped once.
+        "c2pa": c2pa,
+        # The caller REFUSES the file if this is not what it asked for. Reported from the file on
+        # disk rather than echoed from the argument, so the check is on the bytes.
+        "size": f"{measured[0]}x{measured[1]}",
+    }
+
+
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description="Rebuild this set's derivatives.")
     parser.add_argument("--provider", default=None, help="provider id from providers.json")
+    parser.add_argument(
+        "--resample",
+        nargs=3,
+        metavar=("SOURCE", "TARGET", "WxH"),
+        default=None,
+        help="Lanczos SOURCE down to WxH at TARGET and print the result as JSON. Used by "
+        "generate.ts for a provider that refuses to generate at a declared size.",
+    )
     args = parser.parse_args(argv[1:])
+
+    if args.resample:
+        source, target, wanted = args.resample
+        width, height = (int(n) for n in wanted.split("x"))
+        json.dump(resample_one(Path(source), Path(target), (width, height)), sys.stdout)
+        return 0
+
     provider = providers.by_id(args.provider) if args.provider else providers.reference()
     global ROOT
     ROOT, ASSETS = provider.root, provider.assets
