@@ -395,6 +395,37 @@ The same command naming the other model. There is no undo flag and no second cod
 gpt-image-2 is shipped, flux-2-pro is an ordinary candidate at `candidates/flux-2-pro/`, and
 promoting it back is the identical operation with the two ids exchanged.
 
+### The round trip, measured rather than asserted
+
+"Reversible" is a claim about a program, and it was checked before it was written down here. One
+sha256 was taken over everything a promotion moves — `assets/`, `candidates/`, `native/`,
+`MANIFEST.json` and `providers.json` — by hashing each file's **path together with its bytes**, so
+that a file moving from one tree to another changes the total even though nothing about the file
+changed. That is 278 files on this branch. The switch was then run twice in each direction:
+
+| | digest over the 278 files |
+| --- | --- |
+| before | `1611a746f47175b1…` |
+| after `promote.py --provider gpt-image-2` | `611dc0a9dfa10152…` |
+| after `promote.py --provider flux-2-pro` | `1611a746f47175b1…` |
+| after the second promotion | `611dc0a9dfa10152…` |
+| after the second switch back | `1611a746f47175b1…` |
+
+**Two things are proved there rather than one.** The repository returns byte for byte to where it
+started — `git status` on tracked files agrees, with `assets/` and `MANIFEST.json` unmodified — and
+the *switched* state has a single digest too, so the promotion is **deterministic**: promoting the
+same candidate twice produces the identical tree. A reversible operation that produced a slightly
+different arrangement each time would still pass a "did it come back" test and would be a much worse
+thing to own.
+
+`verify.py` was run in the promoted state as well and reported **0 failures across 2 sets** with
+prompt parity live, which is the other half of the claim: the switch is reversible *and* the
+repository is green on both sides of it.
+
+The digests are a measurement taken at one commit, not a constant. They move the instant any file in
+either set changes, which is the point — re-take them around a promotion rather than comparing
+against these.
+
 ### What a promotion does NOT do
 
 It does not materialise anything. `aetherholm-web/public` holds 80 committed PNGs and every one of
