@@ -821,3 +821,53 @@ its 96 assets are a Lanczos downscale of something larger, which is a resampling
 repository made and not something the model did. The measurements are reproducible on demand and the
 by-eye scoring is not. Where the two disagree, the tables are what can be checked and the prose is
 what has to be argued with.
+
+## Addendum: the experiment this document proposed could not be run, so the control was run instead
+
+The section above ends by naming what would change the verdict — a regeneration of the losing
+categories with the brief pushed towards **filled shapes** rather than the outline register
+gpt-image-2 chose for the crests and the ship icons. That was attempted on 2026-08-16. **It is not
+possible in this repository**, and the reason is a property of the tooling rather than of the models.
+
+`reprompt` — the field that would carry a changed instruction — is **reference-only**. A candidate
+set replays the prompt string recorded in its own manifest; there is no supported path that hands a
+candidate provider a new brief without first making it the reference, which is the promotion this
+document recommends against. The only thing that could be run was a plain re-roll: same literal
+prompt, same setting, new draws.
+
+That is the control for the proposed experiment, and it separates two explanations the section above
+could not distinguish: *the model answered this brief that way* versus *the model draws that way when
+asked this*.
+
+**Forty-nine assets were re-rolled** — all 16 `heraldry` crests, all 16 `icons`, all 10 `shipicons`,
+6 `splashes` and the title mark: every category the verdict turned on, and then some. The result:
+
+| | flux-2-pro | gpt-image-2 before | gpt-image-2 after |
+| --- | ---: | ---: | ---: |
+| marks under 50% at 16px | 8 | 35 | **37** |
+
+**Forty-nine new draws moved the headline row backwards.** The crests came back hollow again —
+24–47% contrast retained at 16px, the same band as before — and all ten ship icons are still under
+the line. This is not variance to be re-rolled past. It is what the model does with this brief at
+this setting, and 49 fresh draws is a large enough sample to stop calling it luck.
+
+The set was re-normalised and re-derived after the re-rolls, in the order this repository's tools
+require — `normalise_ground.py --provider gpt-image-2` over the delivered sources first, then
+`--derive-only`, because a derivative must be cut from an already-normalised parent.
+`verify.py --provider gpt-image-2 --as-shipped` reports **0 failures** with conformance and
+completeness held fatal.
+
+Three things follow, and only the first is about this repository.
+
+1. **The verdict stands: do not promote.** Unchanged, for the reasons already given, now with the
+   re-roll defence closed rather than left open.
+2. **The candidate remains switchable and is committed.** The set passes its own gate as shipped and
+   `promote.py --provider gpt-image-2` carries it out in one command, reversibly, the day somebody
+   disagrees.
+3. **The same model won the sibling brand repository on this exact criterion the same day** — 7
+   marks under 50% at 16px against the reference's 11. Same model, same setting, same literal
+   dialect, opposite result. What separates them is the brief: `micro-brand` asks for solid emblems;
+   this repository asks for heraldry and vessels, where the model reaches for line work and a crest
+   drawn in line work disappears at 16px. **That is a fact about our prompts, not about the model.**
+   The filled-shape experiment remains the right one to run, and running it needs a `reprompt` path
+   for candidates, which does not exist today.
