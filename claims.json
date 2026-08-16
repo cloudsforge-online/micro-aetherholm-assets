@@ -140,6 +140,99 @@
       "derive": "estate.generated"
     },
     {
+      "document": "COMPARISON.md",
+      "find": "challenger: gpt-image-2, on the same (\\d+) assets",
+      "derive": "repo.generated"
+    },
+    {
+      "document": "COMPARISON.md",
+      "find": "holds the same \\*\\*(\\d+) entries\\*\\* as the reference",
+      "derive": "candidate.assets(aetherholm-assets|gpt-image-2)",
+      "why": "the candidate's own manifest, not this one's — the sentence asserts they agree, so the claim must read the OTHER file or it is checking itself"
+    },
+    {
+      "document": "COMPARISON.md",
+      "find": "as the reference: \\*\\*(\\d+) generated\\*\\*",
+      "derive": "repo.generated"
+    },
+    {
+      "document": "COMPARISON.md",
+      "find": "\\*\\*(\\d+) derived\\*\\* — three favicons",
+      "derive": "repo.derived"
+    },
+    {
+      "document": "COMPARISON.md",
+      "find": "\\*\\*Seventy-three of the (\\d+) could not be requested",
+      "derive": "repo.generated"
+    },
+    {
+      "document": "COMPARISON.md",
+      "find": "measured, over all (\\d+) entries",
+      "derive": "repo.assets"
+    },
+    {
+      "document": "COMPARISON.md",
+      "find": "\\| assets needing at least one retry \\| (\\d+) / \\d+ \\| \\*\\*0 / \\d+\\*\\* \\|",
+      "derive": "repo.retried"
+    },
+    {
+      "document": "COMPARISON.md",
+      "find": "\\| assets needing at least one retry \\| \\d+ / (\\d+) \\| \\*\\*0 / \\d+\\*\\* \\|",
+      "derive": "repo.generated"
+    },
+    {
+      "document": "COMPARISON.md",
+      "find": "\\| total retries \\| (\\d+) \\| \\*\\*0\\*\\* \\|",
+      "derive": "repo.retries"
+    },
+    {
+      "document": "COMPARISON.md",
+      "find": "\\| failed attempts logged \\| (\\d+) \\| \\*\\*0\\*\\* \\|",
+      "derive": "repo.failedAttempts",
+      "why": "the only claim in this file that reads the attempts ledger; it is what separates 'never retried' from 'never logged a retry'"
+    },
+    {
+      "document": "COMPARISON.md",
+      "find": "measured off the bytes \\| \\*\\*(\\d+) / \\d+\\*\\* \\| 23 / \\d+ \\|",
+      "derive": "repo.c2pa"
+    },
+    {
+      "document": "COMPARISON.md",
+      "find": "measured off the bytes \\| \\*\\*\\d+ / (\\d+)\\*\\* \\| 23 / \\d+ \\|",
+      "derive": "repo.assets"
+    },
+    {
+      "document": "COMPARISON.md",
+      "find": "\\*\\*FLUX 2 Pro: 289\\.5 provider image units\\*\\* over (\\d+) generations",
+      "derive": "repo.generated",
+      "why": "anchored on the single bold run rather than on the figure, because the transcribed section states the same cost line as **FLUX 2 Pro:** **289.5 ... and declares itself unpinned; a looser pattern matches both and claims.py correctly refuses a claim that matches twice"
+    },
+    {
+      "document": "COMPARISON.md",
+      "find": "\\*\\*FLUX 2 Pro: 289\\.5 provider image units\\*\\* over \\d+ generations, 3\\.02 per image, (\\d+) derivatives free",
+      "derive": "repo.derived"
+    },
+    {
+      "document": "COMPARISON.md",
+      "find": "output image tokens\\*\\* over (\\d+) generations",
+      "derive": "repo.generated"
+    },
+    {
+      "document": "COMPARISON.md",
+      "find": "The reference's (\\d+) retries were\\noverwhelmingly",
+      "derive": "repo.retries"
+    },
+    {
+      "document": "COMPARISON.md",
+      "find": "challenger logged zero retries in (\\d+) generations",
+      "derive": "repo.generated"
+    },
+    {
+      "document": "COMPARISON.md",
+      "find": "This is one run of (\\d+) images at one setting",
+      "derive": "repo.generated"
+    },
+    {
       "document": "materialise.py",
       "find": "([\\d,]+) entries across the three repositories",
       "derive": "estate.assets"

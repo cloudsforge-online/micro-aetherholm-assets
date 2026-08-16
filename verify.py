@@ -34,13 +34,18 @@ Seven checks:
      is recorded on them, not gated.
 
 
-** ONE CHECK IN HERE IS DORMANT, AND IT SAYS SO ON EVERY RUN. ** The owner withdrew Qwen-Image
-2512 and its candidate trees are deleted, so `check_parity` — the only check here that compares
-SETS rather than reading one manifest and its bytes — has a single operand and returns clean
-because it was handed one document. `main` prints DORMANT instead of a zero, and `--self-test`
-hands the real function two-set fixtures so it cannot quietly stop being able to fail. Every
-other check in this file is unaffected: they read the shipped manifest and the shipped pixels,
-and they would go red today exactly as they would have yesterday.
+** THE ONE CHECK THAT COMPARES SETS WAS DORMANT FOR A YEAR, AND IS LIVE AGAIN. ** `check_parity`
+— the only check here that compares SETS rather than reading one manifest and its bytes — had a
+single operand from the day the owner withdrew Qwen-Image 2512 and its candidate trees were
+deleted, and it returned clean because it had been handed one document rather than because it
+looked and found nothing. `candidates/gpt-image-2/` put a second manifest on disk, so it now
+compares real recorded prompts and a disagreement of one word fails. **None of the dormant
+machinery has been removed**, because that state comes back the moment a checkout holds one set
+or a run is narrowed with `--provider`: `main` still prints DORMANT instead of a zero whenever
+fewer than two sets are read, and `--self-test` still hands the real function two-set fixtures so
+it cannot quietly stop being able to fail. Every other check in this file is unaffected either
+way: they read one manifest and its pixels, and they would go red today exactly as they would
+have yesterday.
 
     python3 verify.py --self-test    # break the cross-set guard on a fixture; no images needed
     python3 verify.py                 # everything
@@ -239,18 +244,21 @@ def check_parity(documents: dict[str, dict]) -> list[str]:
     an extra key means something generated a prompt of its own, which is the failure this whole
     check exists to catch.
 
-    ** IT IS DORMANT TODAY, WHICH IS WHY THE EARLY RETURN BELOW IS NARROW AND SAYS SO. ** The owner
-    withdrew Qwen-Image 2512 and both its candidate trees have been deleted, so there is one
-    manifest on disk and this function has nothing to compare it against. It returns clean because
-    it was handed ONE DOCUMENT, not because it looked and found nothing — and an exit code cannot
-    tell those two apart. That is this estate's recurring defect, found five times in a day: a CI
-    job that read image metadata without decoding the image, a grep that skipped files containing
-    NUL bytes, a secret scan whose `-I` discarded the binary stream it was meant to search.
+    ** THE EARLY RETURN BELOW IS NARROW ON PURPOSE, AND THE CALLER SAYS SO OUT LOUD. ** For the
+    year between Qwen-Image 2512 being withdrawn and gpt-image-2 arriving, every repository here
+    held exactly one manifest and this function had nothing to compare it against. It returned
+    clean because it had been handed ONE DOCUMENT, not because it looked and found nothing — and an
+    exit code cannot tell those two apart. That is this estate's recurring defect, found five times
+    in a day: a CI job that read image metadata without decoding the image, a grep that skipped
+    files containing NUL bytes, a secret scan whose `-I` discarded the binary stream it was meant
+    to search.
 
-    So the guard below is spelled "fewer than two sets" and never "no problems"; `main` prints the
-    word DORMANT instead of a reassuring zero; and `python3 verify.py --self-test` runs this exact
-    function against two-set fixtures on every CI run. A SECOND SET WHOSE PROMPT DIFFERS BY ONE
-    WORD MUST STILL FAIL, and that sentence is executable rather than a claim.
+    That state can always come back — a promotion deletes the loser, and `--provider X` narrows a
+    live run to one document on any afternoon — so the guard below is spelled "fewer than two sets"
+    and never "no problems"; `main` prints the word DORMANT instead of a reassuring zero whenever
+    it fires; and `python3 verify.py --self-test` runs this exact function against two-set fixtures
+    on every CI run regardless of what is on disk. A SECOND SET WHOSE PROMPT DIFFERS BY ONE WORD
+    MUST STILL FAIL, and that sentence is executable rather than a claim.
     """
     if len(documents) < 2:
         return []
@@ -328,17 +336,20 @@ def check_parity(documents: dict[str, dict]) -> list[str]:
 
 
 # ══════════════════════════════════════════════════════════════════════════════════════════════
-# THE DORMANT CHECK, AND THE MACHINERY THAT PROVES IT CAN STILL BITE
+# THE CHECK THAT CAN GO DORMANT, AND THE MACHINERY THAT PROVES IT CAN STILL BITE
 #
 # `check_parity` above is the only check in this file that is ABOUT THE SET OF SETS. Every other
-# check reads one manifest and the bytes it points at, and goes on working exactly as before. This
-# one compares sets to each other, the owner withdrew the only challenger, and so it now has one
-# operand. Its failure count went to zero at a stroke with nothing about the shipped set changed.
+# check reads one manifest and the bytes it points at, and goes on working whatever else is on
+# disk. This one compares sets to each other, so when the owner withdrew the only challenger it was
+# left with one operand: its failure count went to zero at a stroke with nothing about the shipped
+# set changed. gpt-image-2 has given it a second operand back, and everything below stays exactly
+# as it was written, because the state it guards against is one `--provider` flag away and returns
+# in full the next time a promotion leaves a single set on disk.
 #
 # That is the precise shape of a number improving because a check stopped looking, and this estate
 # has been bitten by it repeatedly. The response here is two things, neither of which is a comment:
-# `main` prints DORMANT rather than 0, and everything below hands the real function a real second
-# set and fails if it stays green.
+# `main` prints DORMANT rather than 0 whenever fewer than two sets are read, and everything below
+# hands the real function a real second set and fails if it stays green.
 # ══════════════════════════════════════════════════════════════════════════════════════════════
 
 #: A recorded prompt that the positive dialect genuinely REWRITES, and whose rewrite comes out with
@@ -377,8 +388,10 @@ class _registry_with:
     to a check that could not see a second provider at all, and would prove nothing.
 
     So this appends to the REAL document rather than inventing one: `identity`, `reference` and
-    dialects.json are exactly what ships. What is synthetic is a second SET, which is precisely the
-    thing that no longer exists on disk and nothing else. The challengers are registered `live`,
+    dialects.json are exactly what ships. What is synthetic is a second SET, and nothing else —
+    which for a year was precisely the thing that did not exist on disk, and is why these fixtures
+    are built in memory rather than read from `candidates/`: they must go red in a checkout that
+    has one set, or none, or one that has just been promoted. The challengers are registered `live`,
     because a withdrawn provider with a manifest present would get the same verdict — this function
     compares the manifests it is GIVEN — and registering them live is the harder case to pass.
     """
@@ -537,10 +550,35 @@ def self_test() -> int:
         check_parity(lone) == [],
         [],
     )
+    # ---- AND THAT A FULL RUN REALLY COMPARES EVERYTHING ON DISK.
+    #
+    # This slot used to assert `len(providers.present()) == 1` — "and the repository really is in
+    # that state, so the DORMANT line is not decoration". That was true when it was written and it
+    # went false the hour gpt-image-2's manifest landed, failing the self-test for the one reason a
+    # self-test must never fail: the estate got BETTER. Pinning a headcount pins the weather.
+    #
+    # What that line was really guarding is worth keeping, so it is asserted directly instead: a
+    # full run must hand `check_parity` every set that exists. The way this check silently dies is
+    # not the count changing, it is `selected()` growing a filter — on `shipped`, on `status`, on
+    # anything — that quietly drops the candidate, at which point two sets sit on disk and the
+    # comparison between them never runs while the output still says how many failures it found.
+    # That is falsifiable, it is about the code rather than about today, and it holds at one set,
+    # at two, and after a promotion demotes the loser.
+    present = {p.id for p in providers.present()}
+    full_run = {p.id for p in providers.selected(argparse.Namespace(provider=None))}
     check(
-        "and the repository really is in that state, so the DORMANT line is not decoration",
-        len(providers.present()) == 1,
-        [f"{len(providers.present())} set(s) present on disk"],
+        "a full run selects every set on disk, so nothing can sit unread beside a green parity line",
+        full_run == present,
+        [f"on disk: {sorted(present)}", f"a full run reads: {sorted(full_run)}"],
+    )
+    print(
+        f"      (informational: {len(present)} set(s) on disk — "
+        + (
+            "a full run compares them, so parity is LIVE"
+            if len(present) > 1
+            else "a full run is therefore DORMANT, which is what main will print"
+        )
+        + ")"
     )
 
     print("===== self-test: the cross-set guard, broken on a fixture")
@@ -554,6 +592,90 @@ def self_test() -> int:
     print(f"\n{failed} of {len(checks)} self-test(s) failed")
     return 1 if failed else 0
 
+
+
+NATIVE_COLUMNS = ("nativePath", "nativeSize", "nativeSha256", "nativeC2pa")
+
+
+def check_native(asset: dict, root: Path) -> list[str]:
+    """The four `native*` columns, re-derived from the file they name. INTEGRITY, never conformance.
+
+    ## What these columns are, and why they need a check of their own
+
+    Some endpoints refuse to generate at a size this set declares. gpt-image-2 has a minimum pixel
+    budget, measured by bisection to sit in (524288, 655360], and SEVENTY-THREE of this set's
+    ninety-six generations fall under it: fifty-two buildings, heraldry and icons at 512x512, ten
+    ship pips at 256x256, ten airship profiles at 1024x512 and the 1024x384 wordmark. Each is
+    generated at an exact multiple of the same aspect ratio and Lanczos'd DOWN by
+    `derive.py --resample`, and the as-delivered file is kept at
+    `native/<set>/<slug>-<w>x<h>-asdelivered.png` — outside `assets/`, so the orphan walk below does
+    not see it and so nothing ever ships it by accident.
+
+    That leaves the shipped-looking PNG one step removed from anything the model returned, which is
+    exactly the situation in which "generated at 512x512" quietly becomes an upscale of something
+    smaller. Four columns say what the model actually delivered; without this function they are four
+    strings nobody has ever compared to a file, which is this estate's favourite kind of defect.
+    `verify.py`'s whole claim is that a manifest is TRUE about bytes, and the native columns are
+    part of the manifest. Three quarters of a gpt-image-2 set carries them here, so this is not an
+    edge-case check in this repository — it is the check that covers most of the set.
+
+    Five things are checked and every one of them is fatal for a candidate as well as for the
+    shipped set, because all five are claims the manifest makes about itself:
+
+      * the columns arrive together or not at all — three of four is a half-written record
+      * the named file exists, and its sha256 and c2pa state are what the row says (c2pa MEASURED,
+        because re-encoding drops the chunk and the downscaled asset is expected to have lost it
+        while the native is expected to have kept it — the pair is the evidence)
+      * the file's real pixel size is `nativeSize`
+      * the native is not SMALLER than the declared size on either axis. That is the upscale check.
+        A native under the declared size means the shipped file was invented, not downscaled.
+      * the two aspect ratios agree to within half a pixel, so the "derived" file really is this
+        file's downscale and not a differently-shaped image that happens to sit beside it.
+    """
+    if not any(column in asset for column in NATIVE_COLUMNS):
+        return []
+    missing = [column for column in NATIVE_COLUMNS if column not in asset]
+    if missing:
+        held = ", ".join(sorted(set(NATIVE_COLUMNS) - set(missing)))
+        return [f"records {held} but not {', '.join(missing)}"]
+
+    problems: list[str] = []
+    native = root / asset["nativePath"]
+    if not native.exists():
+        return [f'nativePath {asset["nativePath"]} is not on disk']
+
+    data = native.read_bytes()
+    if hashlib.sha256(data).hexdigest() != asset["nativeSha256"]:
+        problems.append(f'{asset["nativePath"]}: checksum does not match nativeSha256')
+    carries = C2PA_MARKER in data
+    if carries != asset["nativeC2pa"]:
+        problems.append(
+            f'{asset["nativePath"]}: manifest says nativeC2pa={asset["nativeC2pa"]} and the bytes '
+            f"say {carries}"
+        )
+
+    with Image.open(native) as raw:
+        measured = raw.size
+    stated = tuple(int(n) for n in asset["nativeSize"].split("x"))
+    if measured != stated:
+        problems.append(
+            f'{asset["nativePath"]}: {measured[0]}x{measured[1]} against a recorded nativeSize '
+            f'{asset["nativeSize"]}'
+        )
+
+    declared = tuple(int(n) for n in asset["declaredSize"].split("x"))
+    if measured[0] < declared[0] or measured[1] < declared[1]:
+        problems.append(
+            f'native {measured[0]}x{measured[1]} is smaller than the declared '
+            f'{asset["declaredSize"]} on at least one axis — the shipped file would be an UPSCALE '
+            "of it, and no set here upscales"
+        )
+    elif abs(measured[0] / measured[1] - declared[0] / declared[1]) > 0.5 / max(declared):
+        problems.append(
+            f'native {measured[0]}x{measured[1]} is not the same shape as the declared '
+            f'{asset["declaredSize"]}, so the shipped file is not a downscale of it'
+        )
+    return problems
 
 
 def check_integrity(provider, document: dict) -> list[str]:
@@ -575,7 +697,7 @@ def check_integrity(provider, document: dict) -> list[str]:
     return problems
 
 
-def verify_set(provider, document: dict, wanted: set[str]) -> list[str]:
+def verify_set(provider, document: dict, wanted: set[str], as_shipped: bool = False) -> list[str]:
     plan = json.loads(PLAN.read_text())
     ground_target = hex_to_rgb(GROUND)
 
@@ -611,7 +733,7 @@ def verify_set(provider, document: dict, wanted: set[str]) -> list[str]:
         and f'{planned["key"]}-source' not in assets
     ]
     if missing:
-        if provider.shipped:
+        if provider.shipped or as_shipped:
             failures.extend(f"{key}: planned but never generated" for key in missing)
         else:
             print(
@@ -648,6 +770,10 @@ def verify_set(provider, document: dict, wanted: set[str]) -> list[str]:
                 f'manifest says c2pa={asset["c2pa"]} and the bytes say {carries_c2pa} — '
                 "the disclosure has drifted from the file"
             )
+
+        # INTEGRITY, always. See check_native's docstring: without it, "generated at 512x512" on
+        # seventy-three of a set's ninety-six entries is a sentence nobody has compared to a file.
+        problems.extend(check_native(asset, provider.root))
 
         with Image.open(path) as raw:
             image = raw.convert("RGB")
@@ -693,7 +819,7 @@ def verify_set(provider, document: dict, wanted: set[str]) -> list[str]:
                     f'{MAX_HUE_DRIFT:.0f} degrees of {asset["accent"]} (floor {floor * 100:.1f}%)'
                 )
 
-        fatal = problems + (conformance if provider.shipped else [])
+        fatal = problems + (conformance if (provider.shipped or as_shipped) else [])
         mark = "FAIL" if fatal else ("warn" if conformance else "ok  ")
         rows.append(
             f'{mark} {asset["set"]:<10} {asset["slug"]:<24} {asset["declaredSize"]:>9} '
@@ -731,6 +857,30 @@ def main(argv: list[str]) -> int:
         action="store_true",
         help="break the cross-set guard against a fixture and prove it goes red. No images needed.",
     )
+    # ═══ WHY A FLAG THAT ONLY CHANGES WHAT COUNTS AS FATAL ═══════════════════════════════════════
+    #
+    # The INTEGRITY / CONFORMANCE split below is right and is not being softened: a manifest that
+    # is untrue about its bytes is broken for every set, and how far a CANDIDATE's art sits from
+    # the art bible is the comparison's first criterion rather than a broken build. Turning CI red
+    # for a challenger would mean the only way to land the evidence is to weaken a check.
+    #
+    # But it leaves a gap with teeth, and it is a gap about the FUTURE rather than about today. A
+    # candidate can pass `--provider <id>` with a page of conformance deviations printed as warn,
+    # be promoted on the strength of that green line, and turn the repository red the instant
+    # `shipped` flips to true — at which point the artwork is already at `assets/` and the honest
+    # fix is to switch back. In micro-brand this is not hypothetical: gpt-image-2 passes its own
+    # verify and fails as-shipped on one asset's accent coverage.
+    #
+    # `--as-shipped` asks the other question: not "is this candidate sound" but "would this set be
+    # green if it were the shipped one". It changes nothing except which list is fatal — the same
+    # measurements, the same output, the same rows. `promote.py` gates on it, so a promotion cannot
+    # be the thing that discovers the answer.
+    parser.add_argument(
+        "--as-shipped",
+        action="store_true",
+        help="hold a candidate to the SHIPPED set's rules: conformance and completeness become "
+        "fatal. What promote.py gates on, so a promotion cannot discover the answer.",
+    )
     args = parser.parse_args(argv)
 
     if args.self_test:
@@ -745,10 +895,13 @@ def main(argv: list[str]) -> int:
     documents: dict[str, dict] = {}
 
     for provider in chosen:
-        print(f"===== {provider.id}  ({provider.label})")
+        print(
+            f"===== {provider.id}  ({provider.label})"
+            + ("  — graded AS SHIPPED" if args.as_shipped and not provider.shipped else "")
+        )
         document = json.loads(provider.manifest.read_text())
         documents[provider.id] = document
-        failures = verify_set(provider, document, set(args.sets))
+        failures = verify_set(provider, document, set(args.sets), as_shipped=args.as_shipped)
         failures.extend(check_integrity(provider, document))
         print(f"{len(failures)} failure(s) in {provider.id}\n")
         all_failures.extend(f"{provider.id}: {f}" for f in failures)
@@ -789,7 +942,17 @@ def main(argv: list[str]) -> int:
         )
     all_failures.extend(f"parity: {p}" for p in parity)
 
-    print(f"\n{len(all_failures)} failure(s) across {len(chosen)} set(s)")
+    trailer = f"\n{len(all_failures)} failure(s) across {len(chosen)} set(s)"
+    if args.as_shipped:
+        # Said out loud, because a red line under --as-shipped means something quite different
+        # from a red line without it: the set is SOUND and would not be CONFORMANT if it shipped.
+        # Reading it as "the candidate is broken" is how a real answer gets argued with.
+        trailer += (
+            " — graded AS SHIPPED, so conformance and completeness were fatal. A failure here "
+            "means this set would turn the repository red if it were promoted, not that its "
+            "manifest is untrue about its bytes."
+        )
+    print(trailer)
     return 1 if all_failures else 0
 
 
